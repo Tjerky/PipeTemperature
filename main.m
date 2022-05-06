@@ -4,7 +4,7 @@
 R = 0.006; % m, outside radius of the tube
 d = 0.001; % m, thickness of the tube wall
 N = 100; % number of gridpoints in the r direction
-M = 100; % number of gridpoints in the theta direction
+P = 100; % number of gridpoints in the theta direction
     
     % material properties
 rho = 295.5; % kg/m^3, density of the pipe material
