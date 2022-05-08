@@ -12,7 +12,7 @@ dx = d/N;
 dy = 2*pi*R/P;
 
     % simulation
-runtime = 1; % s, the time the simulation will run
+runtime = 100; % s, the time the simulation will run
 dt = 0.01; % s, the timestep
     
     % material properties
@@ -20,15 +20,16 @@ dt = 0.01; % s, the timestep
 rho = 295.5; % kg/m^3, density of the pipe material
 k = 0.13; % W/(m K), thermal conductivity of the pipe material
 cp = 1470; % J/(kg K), specific heat of the pipe material
-c = 5000; % W/(m^2 K), heat transfer coefficient pipe -> water
+c = 500; % W/(m^2 K), heat transfer coefficient pipe -> water
         %water
 cw = 4180; % J/(kg K)
     % sunlight
-I = 1; % W/m^2, intensity of the sunlight
+I = 1000; % W/m^2, intensity of the sunlight
 
 % define the matrix
 alpha = k*dt/(rho*cp*dx^2); % constant to simplify the formulas
-beta = c*dt/(rho*cp*dx) * 0; % constant to simplify the formulas
+beta = c*dt/(rho*cp*dx); % constant to simplify the formulas
+gamma = I*dt/(rho*cp*dx);
 
 M = GenerateM(N, alpha); % generate the M matrix
 Mi = inv(M); % generate the inverse of M
@@ -50,12 +51,12 @@ Tinitial = 295; % K, initial temperature of the water and the pipe
     % everywhere
 T(1, :, :) = Tinitial * ones(N, P);
     % set initial water temperature to be the initial temperature
-Tw(1) = Tinitial;
+Tw(1) = Tinitial-10;
 
 % loop over all timepoints
 for t = 2:(runtime/dt)
     % Generate the Q matrix
-    Q = GenerateQ(squeeze(T(t-1, :, :)), Tw(t-1), beta, I, P, N, dx);
+    Q = GenerateQ(squeeze(T(t-1, :, :)), Tw(t-1), beta, gamma, P, N);
     
     % loop over all pipe segments
     for i = 1:P       
