@@ -27,10 +27,11 @@ cw = 4180; % J/(kg K)
 I = 1000; % W/m^2, intensity of the sunlight
 
 % define the matrix
-alpha = k/(rho*cp*dx^2); % constant to simplify the formulas
-beta = c/(rho*cp); % constant to simplify the formulas
+alpha = k*dt/(rho*cp*dx^2); % constant to simplify the formulas
+beta = c/(rho*cp) * 0; % constant to simplify the formulas
 
 M = GenerateM(N, alpha); % generate the M matrix
+Mi = inv(M); % generate the inverse of M
 A = GenerateA(N, alpha, beta); % generate the A matrix
 
 % generate the 3D array (time x Y x X) storing all the the temperature distribution
@@ -48,27 +49,23 @@ Tinitial = 295; % K, initial temperature of the water and the pipe
     % set initial temperature distribution to be the initial temperature
     % everywhere
 T(1, :, :) = Tinitial * ones(N, P);
+T(1, :, 30) = 296;
     % set initial water temperature to be the initial temperature
 Tw(1) = Tinitial;
 
 % loop over all timepoints
 for t = 2:(runtime/dt)
     % Generate the Q matrix
-    Q = GenerateQ(P, N, T(t-1), beta, I/dx);
+    Q = GenerateQ(P, N, T(t-1), beta, I/dx) * 0;
     
     % loop over all pipe segments
-    for i = 1:P
-        % setup the matrix equation: M t(i) = A t(i-1) + q
-        
-            % get the specific q vector for this segment. This represents the
-            % heat generation at every point.
+    for i = 1:P       
+        % get the specific q vector for this segment. This represents the
+        % heat generation at every point.
         q = Q(:, i);
         
-            % setup the right hand side of the matrix equation
-        b = A*squeeze(T(t-1, i, :)) + q;
-            % solve matrix equation for the temperature inside the pipe and
-            % store this value in the 3D array T
-        [T(t, i, :), flag] = minres(M, b);
+        % solve the matrix equation Mx = Ay + q
+        T(t, i, :) = Mi*(A*squeeze(T(t-1, i, :)) + q);
     end
         
     % derive the new temperture of the water
@@ -83,6 +80,7 @@ for t = 2:(runtime/dt)
         % change the water temperate with euler's method and store it in
         % the Tw array
     Tw(t) = Tw(t-1) + qw/(cw * m);
+    Tw(t) = 295;
 end
     
 % store the simulation in as a file

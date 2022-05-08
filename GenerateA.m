@@ -14,11 +14,8 @@ function A = GenerateA(N, alpha, beta)
         % alpha on the right diagonal
         A(j, j+1) = alpha;
     
-    % fill upper row
-    A(1,1) = 2+alpha-2*beta;
-    A(1,2) = -1*alpha;
+    % fill upper row, no-flux boundary condition
+        
+    % fill lower row, no-flux boundary condition
     
-    % fill lower row
-    A(N,N) = 2-alpha;
-    A(N, N-1) = alpha;
 end

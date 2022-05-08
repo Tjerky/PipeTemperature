@@ -15,10 +15,10 @@ function M = GenerateM(N, alpha)
         M(j, j+1) = -1*alpha;
     end
     
-    %fill upper row
-    M(1, 1) = 2-alpha;
-    M(1, 2) = alpha;
-    % fill lower row
-    M(N,N) = 2+alpha;
-    M(N, N-1) = -1*alpha;
+    %fill upper row, no-flux boundary condition
+    M(1, 1) = 1;
+    M(1, 2) = -1;
+    % fill lower row, no-flux boundary condition
+    M(N,N) = 1;
+    M(N, N-1) = -1;
 end
