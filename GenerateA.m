@@ -8,7 +8,7 @@ function A = GenerateA(N, alpha, beta)
     % fill middle rows
     for j = 2:N-1
         % 1-alpha on the diagonal
-        A(j, j) = 1-alpha;
+        A(j, j) = 2-2*alpha;
         % alpha on the left diagonal
         A(j, j-1) = alpha;
         % alpha on the right diagonal
@@ -16,7 +16,7 @@ function A = GenerateA(N, alpha, beta)
     
     % fill upper row
     A(1,1) = 2+alpha-2*beta;
-    A(1,2) = alpha;
+    A(1,2) = -1*alpha;
     
     % fill lower row
     A(N,N) = 2-alpha;

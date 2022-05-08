@@ -16,8 +16,8 @@ function M = GenerateM(N, alpha)
     end
     
     %fill upper row
-    M(1, 1) = 2+alpha;
-    M(1, 2) = -1*alpha;
+    M(1, 1) = 2-alpha;
+    M(1, 2) = alpha;
     % fill lower row
     M(N,N) = 2+alpha;
     M(N, N-1) = -1*alpha;
