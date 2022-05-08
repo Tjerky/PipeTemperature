@@ -24,11 +24,11 @@ c = 5000; % W/(m^2 K), heat transfer coefficient pipe -> water
         %water
 cw = 4180; % J/(kg K)
     % sunlight
-I = 1000; % W/m^2, intensity of the sunlight
+I = 1; % W/m^2, intensity of the sunlight
 
 % define the matrix
 alpha = k*dt/(rho*cp*dx^2); % constant to simplify the formulas
-beta = c/(rho*cp) * 0; % constant to simplify the formulas
+beta = c*dt/(rho*cp*dx) * 0; % constant to simplify the formulas
 
 M = GenerateM(N, alpha); % generate the M matrix
 Mi = inv(M); % generate the inverse of M
@@ -49,14 +49,13 @@ Tinitial = 295; % K, initial temperature of the water and the pipe
     % set initial temperature distribution to be the initial temperature
     % everywhere
 T(1, :, :) = Tinitial * ones(N, P);
-T(1, :, 30) = 296;
     % set initial water temperature to be the initial temperature
 Tw(1) = Tinitial;
 
 % loop over all timepoints
 for t = 2:(runtime/dt)
     % Generate the Q matrix
-    Q = GenerateQ(P, N, T(t-1), beta, I/dx) * 0;
+    Q = GenerateQ(squeeze(T(t-1, :, :)), Tw(t-1), beta, I, P, N, dx);
     
     % loop over all pipe segments
     for i = 1:P       
@@ -80,7 +79,6 @@ for t = 2:(runtime/dt)
         % change the water temperate with euler's method and store it in
         % the Tw array
     Tw(t) = Tw(t-1) + qw/(cw * m);
-    Tw(t) = 295;
 end
     
 % store the simulation in as a file

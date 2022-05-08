@@ -1,19 +1,17 @@
 %% Function to generate a matrix Q with as columns the q vectors in the matrix equations
 
 % define the function
-function Q = GenerateQ(P, N, T, beta, I)
+function Q = GenerateQ(T, Tw, beta, I, P, N, dx)
     % generate a NxP matrix filled with zeros
-    Q = zeros(N, P);
+    Q = 0*T;
     
     % fill the matrix
-    for j = 1:P
-        % upper row with the cooling term due to the flow of water through
-        % the pipe
-        Q(1, j) = 2*beta*T;
+        % upper row with the heat flux from the water calculated with
+        % newton's law of cooling.
+        Q(2, :) = beta*(Tw - T(2, :));
         % lower row with the heating term due to the adsorption of sunlight
+    for j = 1:P
         if j <= P/2
-            Q(N, j) = I * sin(2*pi*(j-1)/P);
+            Q(N-1, j) = I/dx * sin(2*pi*(j-1)/P);
         end
     end
-    
-    % fil
