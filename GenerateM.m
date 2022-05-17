@@ -1,6 +1,6 @@
 %% Function to generate the M matrix in the matrix equation
 
-%function definition
+% function definition
 function M = GenerateM(N, alpha)
     % generate a NxN matrix filled with zeros
     M = zeros(N, N);
