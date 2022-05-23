@@ -45,6 +45,7 @@ Tair = 295; % K, temperature of the air
 rho_al = 2702; % kg/m^3, density of aluminium
 c_al = 880; % J/(kg K), specific heat of aluminium 
 k_al = 237; % W/(m K) thermal conductivity of aluminium
+e_al = 0.1; % unitless, emissivity of the aluminium plate
         % copper
 k_cop = 402; % W/(m K), thermal conductivity of copper
 e_cop = 0.03; % unitless, emissivity of the copper tube
@@ -111,7 +112,7 @@ F0 = [10, 300, 300, 300];
 k8 = ha_al * A;
     % 2. Convection between the air and the copper tube. I assume the
     % contact area covers 9/10 of the outer surface of the copper tube.
-k9 = ha_cop * 2*pi*R_cop_o*L_cop;
+k9 = (9/10)*ha_cop * 2*pi*R_cop_o*L_cop;
     % 3. Conduction between the outer surface of the copper tube and the
     % inner surface for the part in contact with the air. I assume
     % the connection covers 9/10 of the outer surface of the copper tube
@@ -141,9 +142,24 @@ k14 = 2*pi*k_pol*L_pol/log(R_pol_o/R_pol_i);
     % 3. Convection between polyurethane tube and the water
 k15 = hw_pol * 2*pi*R_pol_i*L_pol;
 
+%% Calculate the constants in front of Stefan-Boltzmann's Law (solar collector)
+    % 1. Radiation from the metal plate
+S4 = sigma * e_al * A;
+    % 2. Radiation from the air inside the collector to the metal plate and
+    % the outside air
+S5 = sigma * e_air * A;
+    % 3. Radiation from the air inside the collector to the copper tube
+S6 = sigma * e_air * (9/10) * 2*pi*R_cop_o*L_cop;
+    % 4. Radiation from the copper tube to the air inside the collector
+
+%% Define the system for the heat from the air to the water (solar collector)
+% system definition
+system = @(Q, T1, Ta, Tw) [];
+% initial guess for the solution
+F0 = [10, 300, 300, 300];
+
 %% Reduce the thermal conductivities by taking together heat fluxes in serie and parallel (polyurethane tube)
 % k13, k14 and k15 in series
 K6 = (k13*k14*k15)/(k13*k14+k14*k15+k13*k15);
-
 
 save('variables.mat');
