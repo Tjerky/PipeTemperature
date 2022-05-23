@@ -3,7 +3,7 @@
 % define the constants
     % dimensions
 Rmax = 0.006; % m, outside radius of the tube
-Rmin = 0.004; % m, inside radius of the tube
+Rmin = 0.0049; % m, inside radius of the tube
 N = 100; % number of gridpoints in the r direction
 P = 100; % number of gridpoints in the theta direction
 
@@ -13,7 +13,7 @@ dphi = 2*pi/P;
     % material properties
         %pipe
 rho = 295.5; % kg/m^3, density of the pipe material
-k = 0.13; % W/(m K), thermal conductivity of the pipe material
+k = 398; % W/(m K), thermal conductivity of the pipe material
 cp = 1470; % J/(kg K), specific heat of the pipe material
 c = 5000; % W/(m^2 K), heat transfer coefficient pipe -> water
         %water
