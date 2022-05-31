@@ -13,11 +13,14 @@ R_pol_i = 0.004; % m, inside radius of the polyurethane tube
 
     % dimensions of the solar collector
 A = 1.1; % m^2, area of the aluminium plate
-d = 0.002; % m, thickness of the aluminium plate
+d_plate = 0.002; % m, thickness of the aluminium plate
 L_cop = 5; % m, length of the copper pipe
 R_cop_o = 0.006; % m, outside radius of the copper pipe
 R_cop_i = 0.00545; % m, inside radius of the copper pipe
 H = 0.007; % m, distance between aluminium plate and the glass plate
+d_tempex = 0.05; % m, thickness of the tempex isolation
+d_trespa = 0.06; % m, thickness of the bottom trespa plate
+d_glass = 0.004; % m, thickness of the glass panel
     
     % material properties
         % pvc pipe
@@ -37,8 +40,10 @@ rho_air = 1.225; % kg/m^3, density of air
 c_air = 718; % J/(kg K), specific heat of air
 ha_pvc = 10; % W/(m^2 K), heat transfer coefficient pvc -> air
 ha_cop = 10; % W/(m^2 K), heat transfer coefficient copper -> air
-ha_al = 10; % W/(m^2 K) heat transfer coefficient aluminium -> air
-ha_pol = 10; % W/(m^2 K) heat transfer coefficient polyurethane -> air
+ha_al = 10; % W/(m^2 K), heat transfer coefficient aluminium -> air
+ha_pol = 10; % W/(m^2 K), heat transfer coefficient polyurethane -> air
+ha_tres = 10; % W/(m^2 K), heat transfer coefficient trespa -> air
+ha_glass = 10; % W/(m^2 K), heat transfer coefficient glass -> air
 e_air = 0.8; % unitless, emissivity of the air
 Tair = 295; % K, temperature of the air
         % aluminium
@@ -51,6 +56,12 @@ k_cop = 402; % W/(m K), thermal conductivity of copper
 e_cop = 0.03; % unitless, emissivity of the copper tube
         % polyurethane
 k_pol = 0.13; % W/(m K), thermal conductivity of polyurethane
+        % tempex
+k_tempex = 0.03; % W/(m K)
+        % trespa
+k_trespa = 0.3; % W/(m K)
+        % glass
+k_glass = 0.96; % W/(m K)
     
     % sun
 I = 1000; % W/m^2, intensity of the sunlight
@@ -103,7 +114,7 @@ S3 = e_air * sigma * 2*pi*Rmax*L_pvc;
 
 %% Define the system for the heat flow out the storage vessel
 % system definition
-system = @(Q, T1, T2, T3, Tw) [K1*(Tw-T1) - Q, K2*(T1-T2) + S1*(T1^4-T2^4) - Q, k6*(T2-T3) - Q, k7*(T3-Tair) + S2*T3^4 - S3*Tair^4 - Q];
+system_storage = @(Q, T1, T2, T3, Tw) [K1*(Tw-T1) - Q, K2*(T1-T2) + S1*(T1^4-T2^4) - Q, k6*(T2-T3) - Q, k7*(T3-Tair) + S2*T3^4 - S3*Tair^4 - Q];
 % initial guess for the solution
 F0 = [10, 300, 300, 300];
 
@@ -127,12 +138,25 @@ k12 = (1/10)*hw_cop * 2*pi*R_cop_i*L_cop;
     % 6. Convection between the inner surface of the copper tube and the
     % water from the connection with the air
 k13 = (9/10)*hw_cop * 2*pi*R_cop_i*L_cop;
-
+    % 7. Conduction through the tempex isolation plate
+k14 = k_tempex * A/d_tempex;
+    % 8. Conduction through the trespa plate
+k15 = k_trespa*A/d_trespa;
+    % 9. Convection from the trespa plate to the air
+k16 = ha_tres * A;
+    % 10. Conduction through the glass
+k17 = k_glass * A /d_glass;
+    % 11. Convection from the air to glass
+k18 = ha_glass * A;
 %% Reduce the thermal conductivities by taking together heat fluxes in serie and parallel (solar collector)
-    % k10 and k13 in series, 
+    % k10 and k13 in series
 K4 = (k10*k13)/(k10+k13);
     % k11 and k12 in series
 K5 = (k11*k12)/(k11+k12);
+    % k14, k15 and k16 in series
+K6 = (k14*k15*k16)/(k14*k15+k15*k16+k14*k16);
+    % k17, k18 and k18 in series
+K7 = (k17*k18^2)/(2*k17*k18+k18^2);
 
 %% Calculate thermal conductivities of each layer in W/K (polyurethane tube)
     % 1. Convection between the air and the polyurethane tube
@@ -150,16 +174,17 @@ S4 = sigma * e_al * A;
 S5 = sigma * e_air * A;
     % 3. Radiation from the air inside the collector to the copper tube
 S6 = sigma * e_air * (9/10) * 2*pi*R_cop_o*L_cop;
-    % 4. Radiation from the copper tube to the air inside the collector
+    % 4. Radiation from the copper tube
+S7 = sigma * e_cop * (9/10) * 2*pi*R_cop_o*L_cop;
 
 %% Define the system for the heat from the air to the water (solar collector)
 % system definition
-system = @(Q, T1, Ta, Tw) [];
+system_collector = @(Q1, Q2, T1, Ta, Tw) [K4*(T1-Tw)-Q1, k9*(Ta-T1) - Q2, S7*T1^4 - Q2 + Q1];
 % initial guess for the solution
-F0 = [10, 300, 300, 300];
+F1 = [10, 15, 300];
 
 %% Reduce the thermal conductivities by taking together heat fluxes in serie and parallel (polyurethane tube)
 % k13, k14 and k15 in series
-K6 = (k13*k14*k15)/(k13*k14+k14*k15+k13*k15);
+K8 = (k13*k14*k15)/(k13*k14+k14*k15+k13*k15);
 
 save('variables.mat');
