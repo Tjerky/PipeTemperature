@@ -21,6 +21,7 @@ waitbar(0.02, f, 'Starting simulation')
 
 for i = 2:P
     % Calculate the net heat flow into the water
+    
     Qw = Q_water_collector(Ta(i-1), Tp(i-1), Tw(i-1)) - Q_water_storage(Tw(i-1)) - Q_water_connection(Tw(i-1));
     % Calculate the new temperature of the water
     Tw(i) = Tw(i-1) + dt*Qw/(mw*cw);
