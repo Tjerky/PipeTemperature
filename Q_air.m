@@ -1,8 +1,8 @@
 %% Function to calculate the net heat flowing into the air inside the solar collector
 
 function Q = Q_air(Ta, Tp, Tw)
-load('variables.mat', 'k8','K4', 'K7', 'K8', 'Tair')
+load('variables.mat', 'k8','K9', 'K5', 'Tair')
 
-Q = k8*(Tp-Ta) - (K7+K8)*(Ta-Tair) - K4*(Ta-Tw);
+Q = k8*(Tp-Ta) - K9*(Ta-Tair) - K5*(Ta-Tw);
 
 end

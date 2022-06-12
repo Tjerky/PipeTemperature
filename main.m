@@ -25,13 +25,17 @@ for i = 2:P
     % Calculate the new temperature of the water
     Tw(i) = Tw(i-1) + Qw/(mw*cw);
     
+    % Calculate the heat flows from the aluminium plate to the glass panel
+    % and from the air inside the solar collector to the glass panel
+    [Q_plate_to_glass, Q_air_to_glass] = Q_glass(Tp(i-1), Ta(i-1));
+    
     % Calculate the heat flows into the aluminium plate
-    Qp = Q_plate(Tp(i-1), Ta(i-1), Tw(i-1));
+    Qp = Q_plate(Tp(i-1), Ta(i-1), Tw(i-1)) - Q_plate_to_glass;
     % Calculate the new temperature of the aluminium plate
     Tp(i) = Tp(i-1) + Qp/(m_al*c_al);
     
     % Calculate the heat flow into the air inside the solar collector
-    Qa = Q_air(Ta(i-1), Tp(i-1), Tw(i-1));
+    Qa = Q_air(Ta(i-1), Tp(i-1), Tw(i-1)) - Q_air_to_glass;
     % Calculate the new temperature of the air inside the solar collector
     Ta(i) = Ta(i-1) + Qa/(m_air*c_air);
     

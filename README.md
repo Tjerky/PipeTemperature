@@ -1,2 +1,2 @@
 # PipeTemperature
-The project aims to build a simulation in MATLAB modelling the heat flow through a pipe, which is both heated by the sun and cooled by water flowing through it.
+This project aim to build a working simulation of a flat-plate solar collector design. The aim is to do this with the simple steady state formulas.
