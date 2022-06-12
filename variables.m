@@ -10,31 +10,49 @@ L_pvc = 0.55; % m, length of the pvc pipes
 L_pol = 1; % m, length of the polyurethane tube
 R_pol_o = 0.006; % m, outside radius of the polyurethane tube
 R_pol_i = 0.004; % m, inside radius of the polyurethane tube
+m_pol = 0.12; % kg, mass of the polyurethane tube
 
     % dimensions of the solar collector
+        % aluminium plate
 A = 1.1; % m^2, area of the aluminium plate
-d_plate = 0.002; % m, thickness of the aluminium plate
+d_al = 0.002; % m, thickness of the aluminium plate
+m_al = 5.883; % kg, mass of the aluminium plate
+        % glass
+d_glass = 0.004; % m, thickness of the glass panel
+m_glass = 13.044; % kg, mass of the glass panel
+        % copper pipe
 L_cop = 5; % m, length of the copper pipe
 R_cop_o = 0.006; % m, outside radius of the copper pipe
 R_cop_i = 0.00545; % m, inside radius of the copper pipe
-H = 0.007; % m, distance between aluminium plate and the glass plate
+m_cop = 0.144; % kg, mass of the copper pipe
+c_contact = 0.01; % unitless, ratio between the area of the pipe in contact with the aluminium plate and the total outside area of the pipe.
+        % tempex isolation plate
 d_tempex = 0.05; % m, thickness of the tempex isolation
-d_trespa = 0.06; % m, thickness of the bottom trespa plate
-d_glass = 0.004; % m, thickness of the glass panel
+m_tempex = 1.729; % kg, mass of the tempex plate
+        % trespa plates
+d_trespa = 0.006; % m, thickness of the trespa plates
+        % pinewood enclosure
+m_pin = 11.393; % kg, mass of the pinewood enclosure
+d_pin = 0.027; % m, thickness of the pinewoord enclosure
+A_pin = 0.017; % m^2, area of the pipewood in contact with the air
+        % air inside the solar collector
+m_air = 0.1225; % kg, mass of the air in the solar collector
+        % rest
+H = 0.007; % m, distance between aluminium plate and the glass plate
     
     % material properties
         % pvc pipe
 k_pvc = 0.19; % W/(m K), thermal conductivity of the pipe material (pvc)
 hw_pvc = 3000; % W/(m^2 K), heat transfer coefficient pipe -> water
 hv_pvc = 0.1; % W/(m^2 K), heat transfer coefficient pipe -> partial vacuum
-e_pvc = 0.93; % unitless, emissivity of pvc
+e_pvc = 0.05; % unitless, emissivity of pvc
         % vacuum
 k_v = 1; % W/(m K), thermal conductivity of the vaccuum
         %water
 cw = 4180; % J/(kg K)
 mw = 1; % kg, mass of the water in the system
 hw_cop = 300; % W/(m^2 K), heat transfer coefficient copper -> water
-hw_pol = 10; % W/(m^2 K), heat transfer coefficient polyurethane -> water
+hw_pol = 300; % W/(m^2 K), heat transfer coefficient polyurethane -> water
         % air
 rho_air = 1.225; % kg/m^3, density of air
 c_air = 718; % J/(kg K), specific heat of air
@@ -44,24 +62,31 @@ ha_al = 10; % W/(m^2 K), heat transfer coefficient aluminium -> air
 ha_pol = 10; % W/(m^2 K), heat transfer coefficient polyurethane -> air
 ha_tres = 10; % W/(m^2 K), heat transfer coefficient trespa -> air
 ha_glass = 10; % W/(m^2 K), heat transfer coefficient glass -> air
+ha_pin = 10; % W/(m^2 K), heat transfer coefficient pinewood -> air
 e_air = 0.8; % unitless, emissivity of the air
 Tair = 295; % K, temperature of the air
         % aluminium
-rho_al = 2702; % kg/m^3, density of aluminium
 c_al = 880; % J/(kg K), specific heat of aluminium 
 k_al = 237; % W/(m K) thermal conductivity of aluminium
 e_al = 0.1; % unitless, emissivity of the aluminium plate
         % copper
 k_cop = 402; % W/(m K), thermal conductivity of copper
 e_cop = 0.03; % unitless, emissivity of the copper tube
+c_cop = 377; % J/(kg K)
         % polyurethane
 k_pol = 0.13; % W/(m K), thermal conductivity of polyurethane
+c_pol = 1800; % J/(kg K), specific heat polyurethane
         % tempex
-k_tempex = 0.03; % W/(m K)
-        % trespa
-k_trespa = 0.3; % W/(m K)
+k_tempex = 0.03; % W/(m K), thermal conductivity of tempex
+c_tempex = 1100; % J(kg K), specific heat of tempex
         % glass
-k_glass = 0.96; % W/(m K)
+k_glass = 0.96; % W/(m K), thermal conductivity of glass
+c_glass = 780; % J/(kg K), specific heat glass
+        % pinewood
+c_pin = 2300; % J/(kg K), specific heat of pinewood
+k_pin = 0.12; % W/(m K), thermal conductivity of pinewood
+        % trespa
+k_trespa = 0.3; % W/(m K), thermal conductivity of trespa
     
     % sun
 I = 1000; % W/m^2, intensity of the sunlight
@@ -121,23 +146,22 @@ F0 = [10, 300, 300, 300];
 %% Calculate thermal conductivities of each layer in W/K (solar collector)
     % 1. Convection between the aluminium plate and the air
 k8 = ha_al * A;
-    % 2. Convection between the air and the copper tube. I assume the
-    % contact area covers 9/10 of the outer surface of the copper tube.
-k9 = (9/10)*ha_cop * 2*pi*R_cop_o*L_cop;
+    % 2. Convection between the air and the copper tube.
+k9 = (1-c_contact)*ha_cop * 2*pi*R_cop_o*L_cop;
     % 3. Conduction between the outer surface of the copper tube and the
     % inner surface for the part in contact with the air. I assume
     % the connection covers 9/10 of the outer surface of the copper tube
-k10 =  (9/10)*2*pi*k_cop*L_cop/log(R_cop_o/R_cop_i);
+k10 =  (1-c_contact)*2*pi*k_cop*L_cop/log(R_cop_o/R_cop_i);
     % 4. Conduction between the aluminium plate and the inner surface of
     % the copper tube. I assume the connection covers 1/10 of the outer
     % surface of the copper tube.
-k11 = (1/10)*2*pi*k_cop*L_cop/log(R_cop_o/R_cop_i);
+k11 = c_contact*2*pi*k_cop*L_cop/log(R_cop_o/R_cop_i);
     % 5. Convection between the inner surface of the copper tube and the
     % water from the connection with the aluminium plate
-k12 = (1/10)*hw_cop * 2*pi*R_cop_i*L_cop;
+k12 = c_contact*hw_cop * 2*pi*R_cop_i*L_cop;
     % 6. Convection between the inner surface of the copper tube and the
     % water from the connection with the air
-k13 = (9/10)*hw_cop * 2*pi*R_cop_i*L_cop;
+k13 = (1-c_contact)*hw_cop * 2*pi*R_cop_i*L_cop;
     % 7. Conduction through the tempex isolation plate
 k14 = k_tempex * A/d_tempex;
     % 8. Conduction through the trespa plate
@@ -148,23 +172,26 @@ k16 = ha_tres * A;
 k17 = k_glass * A /d_glass;
     % 11. Convection from the air to glass
 k18 = ha_glass * A;
-%% Reduce the thermal conductivities by taking together heat fluxes in serie and parallel (solar collector)
-    % k10 and k13 in series
-K4 = (k10*k13)/(k10+k13);
-    % k11 and k12 in series
-K5 = (k11*k12)/(k11+k12);
-    % k14, k15 and k16 in series
-K6 = (k14*k15*k16)/(k14*k15+k15*k16+k14*k16);
-    % k17, k18 and k18 in series
-K7 = (k17*k18^2)/(2*k17*k18+k18^2);
+    % 12. Convection from the air to the pinewood enclosure
+k19 = ha_pin * A_pin;
+    % 13. Conduction through the pinewood
+k20 = k_pin * A_pin/d_pin;
 
-%% Calculate thermal conductivities of each layer in W/K (polyurethane tube)
-    % 1. Convection between the air and the polyurethane tube
-k13 = ha_pol * 2*pi*R_pol_o*L_pol;
-    % 2. Conduction through the polyurethane tube
-k14 = 2*pi*k_pol*L_pol/log(R_pol_o/R_pol_i);
-    % 3. Convection between polyurethane tube and the water
-k15 = hw_pol * 2*pi*R_pol_i*L_pol;
+%% Reduce the thermal conductivities by taking together heat fluxes in serie and parallel (solar collector)
+    % k9, k10 and k13 in series, heat transfer from the air to the water
+    % through the copper pipe
+K4 = (k9*k10*k13)/(k9*k10+k9*k13+k10*k13);
+    % k11 and k12 in series, heat transfer from the aluminium plate to the
+    % water through the copper pipe
+K5 = (k11*k12)/(k11+k12);
+    % k14, k15 and k16 in series, heat transfer through the tempex and the
+    % trespa
+K6 = (k14*k15*k16)/(k14*k15+k15*k16+k14*k16);
+    % k17, k18 and k18 in series, heat transfer through the glass panel
+K7 = (k17*k18^2)/(2*k17*k18+k18^2);
+    % k19, k20 and k19 in series, heat transfer through the pinewood
+    % enclosure
+K8 = (k20*k19^2)/(2*k20*k19+k19^2);
 
 %% Calculate the constants in front of Stefan-Boltzmann's Law (solar collector)
     % 1. Radiation from the metal plate
@@ -177,14 +204,16 @@ S6 = sigma * e_air * (9/10) * 2*pi*R_cop_o*L_cop;
     % 4. Radiation from the copper tube
 S7 = sigma * e_cop * (9/10) * 2*pi*R_cop_o*L_cop;
 
-%% Define the system for the heat from the air to the water (solar collector)
-% system definition
-system_collector = @(Q1, Q2, T1, Ta, Tw) [K4*(T1-Tw)-Q1, k9*(Ta-T1) - Q2, S7*T1^4 - Q2 + Q1];
-% initial guess for the solution
-F1 = [10, 15, 300];
+%% Calculate thermal conductivities of each layer in W/K (polyurethane tube)
+    % 1. Convection between the air and the polyurethane tube
+k21 = ha_pol * 2*pi*R_pol_o*L_pol;
+    % 2. Conduction through the polyurethane tube
+k22 = 2*pi*k_pol*L_pol/log(R_pol_o/R_pol_i);
+    % 3. Convection between polyurethane tube and the water
+k23 = hw_pol * 2*pi*R_pol_i*L_pol;
 
 %% Reduce the thermal conductivities by taking together heat fluxes in serie and parallel (polyurethane tube)
 % k13, k14 and k15 in series
-K8 = (k13*k14*k15)/(k13*k14+k14*k15+k13*k15);
+K9 = (k21*k22*k23)/(k21*k22+k21*k23+k22*k23);
 
 save('variables.mat');

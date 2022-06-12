@@ -1,5 +1,9 @@
 %% main file for the simulation
-load('variables.mat', 'P', 'dt', 'mw', 'cw')
+f = waitbar(0, 'Importing variables');
+
+load('variables.mat', 'P', 'dt', 'mw', 'cw', 'm_al', 'c_al', 'm_air', 'c_air')
+
+waitbar(0.01, f, 'Defining initial conditions')
 
 % Define the Tw array with the water temperature at every timepoint
 Tw = zeros(1, P);
@@ -13,17 +17,25 @@ Tp(1) = 295;
 Ta = zeros(1, P);
 Ta(1) = 295;
 
+waitbar(0.02, f, 'Starting simulation')
+
 for i = 2:P
-    % Calculate the heat flows out of the water
-    Qw_out = Q_storage_tank(Tw(i-1)) + Q_polyurethane_tube(Tw(i-1));
-    % Calculate the heat flows into the water
-    Qw_in = Q_air_to_water(Tw(i-1), Ta(i-1)) + Q_plate_to_water(Tw(i-1), Tp(i-1));
+    % Calculate the net heat flow into the water
+    Qw = Q_water_collector(Ta(i-1), Tp(i-1), Tw(i-1)) - Q_water_storage(Tw(i-1)) - Q_water_connection(Tw(i-1));
+    % Calculate the new temperature of the water
+    Tw(i) = Tw(i-1) + Qw/(mw*cw);
     
-    % Calculate the temperature change
-    Tw(i) = Tw(i-1) + (Qw_in-Qw_out)/(mw*cw);
+    % Calculate the heat flows into the aluminium plate
+    Qp = Q_plate(Tp(i-1), Ta(i-1), Tw(i-1));
+    % Calculate the new temperature of the aluminium plate
+    Tp(i) = Tp(i-1) + Qp/(m_al*c_al);
     
-    % Calculate the heat flows into the plate
-    Qp = Q_plate(Tp(i-1) - Q_plate_to_air(Tp(i-1), Ta(i-1)) - Q_plate_to_water(Tw(i-1), Tp(i-1));
-    % Calculate the temperature change
-   
+    % Calculate the heat flow into the air inside the solar collector
+    Qa = Q_air(Ta(i-1), Tp(i-1), Tw(i-1));
+    % Calculate the new temperature of the air inside the solar collector
+    Ta(i) = Ta(i-1) + Qa/(m_air*c_air);
+    
+    waitbar(i/P, f, 'Running simulation')
 end 
+
+close(f)
