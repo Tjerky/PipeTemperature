@@ -96,7 +96,7 @@ I = 1000; % W/m^2, intensity of the sunlight
 sigma = 5.670374419 * 10^-8; % W(m^2 K^4), Stefan-Boltzmann constant
 
     % simulation
-runtime = 120*60; % s, duration of the simulated period
+runtime = 20*60; % s, duration of the simulated period
 dt = 1; % s, duration of one timestep
 
 P = ceil(runtime/dt); % unitless, amount of timesteps
@@ -220,12 +220,14 @@ S5 = sigma * e_air * A;
 S6 = sigma * e_air * (9/10) * 2*pi*R_cop_o*L_cop;
     % 4. Radiation from the copper tube
 S7 = sigma * e_cop * (9/10) * 2*pi*R_cop_o*L_cop;
+    % 5. Radiation from the glass to the air
+S8 = e_glass * sigma * A;
 
 %% Define the system for the heat transfer through the glass panel
 % system definition
-system_glass = @(Q1, Q2, T1, Ta, Tp) [S4*(Tp^4-T1^4) - Q1, k23*(Ta-T1) - Q2, K8*(T1-Tair) - Q1-Q2];
+system_glass = @(Q1, Q2, T1, T2, Ta, Tp) [S4*(Tp^4-T1^4) - Q1, k23*(Ta-T1) - Q2, k22*(T1-T2) - Q1-Q2, k23*(T2-Tair) + S8*(T2^4-Tair^4) - Q1-Q2];
 % initial guess for the solution
-F1 = [10, 10, 300];
+F1 = [10, 10, 300, 300];
 
 %% Calculate thermal conductivities of each layer in W/K (polyurethane tube)
     % 1. Convection between the air and the polyurethane tube

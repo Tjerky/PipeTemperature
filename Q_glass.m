@@ -7,7 +7,7 @@ function [Q_plate_glass, Q_air_glass] = Q_glass(Tp, Ta)
 load('variables.mat', 'system_glass', 'F1');
 
 % adjust the system of equations into the form needed by fsolve
-F = @(x) system_glass(x(1), x(2), x(3), Ta, Tp);
+F = @(x) system_glass(x(1), x(2), x(3), x(4), Ta, Tp);
 % use fsolve to solve the system
 x = fsolve(F, F1);
 
