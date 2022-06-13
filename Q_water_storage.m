@@ -15,6 +15,6 @@ Q_cyl = x(1);
     % 2. Calculate the heat flow out of the endcaps of the storage tank
 Q_caps = K4 * (Tw-Tair);
     % 3. Add the two heat fluxes to obtain the total heat flux out of the storage tank
-Q = Q_cyl + Q_caps;
+Q = Q_cyl + 2 * Q_caps;
 
 end

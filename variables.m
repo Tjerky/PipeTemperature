@@ -89,6 +89,7 @@ k_pin = 0.12; % W/(m K), thermal conductivity of pinewood
 k_trespa = 0.3; % W/(m K), thermal conductivity of trespa
         % polyethylene foam
 k_foam = 0.04; % W/(m K), thermal conductivity of the polyethylene foam
+e_foam = 0.1; % unitless, thermal emissivity of polyethylene foam
     
     % sun
 I = 1000; % W/m^2, intensity of the sunlight
@@ -148,14 +149,13 @@ K4 = (k9*k10*k11*k12)/(k9*k10*k11 + k9*k10*k12 + k9*k11*k12 + k10*k11*k12);
     % Radiation between the outer surface of the inner pvc pipe and the
     % inner surface of the outer pvc pipe
 S1 = (e_pvc/(2-e_pvc)) * sigma * 2*pi*R2*L_pvc;
-    % Radiation from the outer surface of the outer pvc pipe
-S2 = (e_pvc/(2-e_pvc)) * sigma * 2*pi*R4*L_pvc;
-    % Radiation from the air to the outer surface of the outer pvc pipe
-S3 = e_air * sigma * 2*pi*R4*L_pvc;
+    % Radiation between the polyethylene foam wrapping and the surrounding
+    % air
+S2 = e_foam * sigma * 2*pi*R5*L_pvc;
 
 %% Define the system for the heat flow out the storage vessel
 % system definition
-system_storage = @(Q, T1, T2, T3, Tw) [K1*(Tw-T1) - Q, K2*(T1-T2) + S1*(T1^4-T2^4) - Q, K3*(T2-T3) - Q, k8*(T3-Tair) + S2*T3^4 - S3*Tair^4 - Q];
+system_storage = @(Q, T1, T2, T3, Tw) [K1*(Tw-T1) - Q, K2*(T1-T2) + S1*(T1^4-T2^4) - Q, K3*(T2-T3) - Q, k8*(T3-Tair) + S2*(T3^4 - Tair^4) - Q];
 % initial guess for the solution
 F0 = [10, 300, 300, 300];
 
