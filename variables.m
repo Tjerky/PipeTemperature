@@ -66,7 +66,7 @@ Tair = 295; % K, temperature of the air
         % aluminium
 c_al = 880; % J/(kg K), specific heat of aluminium 
 k_al = 237; % W/(m K) thermal conductivity of aluminium
-e_al = 0.1; % unitless, emissivity of the aluminium plate
+e_al = 0.95; % unitless, emissivity of the aluminium plate
         % copper
 k_cop = 402; % W/(m K), thermal conductivity of copper
 e_cop = 0.03; % unitless, emissivity of the copper tube
@@ -96,13 +96,13 @@ I = 1000; % W/m^2, intensity of the sunlight
 sigma = 5.670374419 * 10^-8; % W(m^2 K^4), Stefan-Boltzmann constant
 
     % simulation
-runtime = 20*60; % s, duration of the simulated period
+runtime = 120*60; % s, duration of the simulated period
 dt = 1; % s, duration of one timestep
 
 P = ceil(runtime/dt); % unitless, amount of timesteps
 
     % initial condition
-T_initial = 295; % K, initial temperature of the water
+T_initial = 295; % K, initial temperature
 
 %% Calculate thermal conductivities of each layer in W/K (storage tank)
     % 1. Interface between the water and the inner surface of the inner pvc
@@ -142,7 +142,7 @@ K2 = (k3*k4*k5)/(k3*k4+k4*k5+k3*k5);
     % k6 and k7 in series, heat transfer trough the outer pvc tube and the
     % polyethylene wrapping.
 K3 = (k6*k7)/(k6+k7);
-    % k9, k10, k11 and k12 in series
+    % k9, k10, k11 and k12 in series, heat transfer through the pvc endcaps
 K4 = (k9*k10*k11*k12)/(k9*k10*k11 + k9*k10*k12 + k9*k11*k12 + k10*k11*k12);
 %% Reduced constants in front of Stefan-Boltzmann's Law (storage tank)
     % Radiation between the outer surface of the inner pvc pipe and the
@@ -238,7 +238,7 @@ k27 = 2*pi*k_pol*L_pol/log(R_pol_o/R_pol_i);
 k28 = hw_pol * 2*pi*R_pol_i*L_pol;
 
 %% Reduce the thermal conductivities by taking together heat fluxes in serie and parallel (polyurethane tube)
-% k26, k27 and k28 in series
+% k26, k27 and k28 in series, heat transfer through the polyurethane tube
 K10 = (k26*k27*k28)/(k26*k27+k26*k28+k27*k28);
 
 save('variables.mat');
